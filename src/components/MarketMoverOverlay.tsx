@@ -89,13 +89,12 @@ export function MarketMoverOverlay({ alert }: Props) {
 
       {/* Main overlay body */}
       <div style={{
-        background: `linear-gradient(135deg, #0a0f1a 0%, #0d1829 100%)`,
+        background: bgAccent,
         borderTop: `2px solid ${accent}`,
         padding: "20px 80px",
         display: "flex",
         alignItems: "center",
         gap: 32,
-        background: bgAccent,
         backdropFilter: "blur(20px)",
       }}>
         {/* Icon */}
