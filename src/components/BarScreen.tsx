@@ -416,90 +416,202 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
   // ── IDLE ───────────────────────────────────────────────────────────────────
   const IdleScreen = () => (
     <div style={{
-      display: "flex", height: "100vh",
-      background: teamGradient(C.brand, C.teal),
+      display: "grid",
+      gridTemplateColumns: "440px 860px 1fr",
+      gridTemplateRows: "auto 1fr",
+      height: "100vh",
+      background: `radial-gradient(ellipse at top left, rgba(85,69,211,0.30) 0%, transparent 50%), radial-gradient(ellipse at bottom right, rgba(34,140,136,0.24) 0%, transparent 50%), #060d1c`,
+      fontFamily: FONT,
+      overflow: "hidden",
     }}>
-      {/* Left: branding + QR */}
+
+      {/* TOP HEADER — spans all 3 columns */}
       <div style={{
-        width: 480, background: C.bgPanel,
-        borderRight: `1px solid ${C.border}`,
-        display: "flex", flexDirection: "column", alignItems: "center",
-        justifyContent: "center", gap: 32, padding: "60px 48px",
+        gridColumn: "1 / -1",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: "rgba(0,0,0,0.3)",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        padding: "16px 48px",
       }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 52, fontWeight: 900, color: C.text, fontFamily: FONT, letterSpacing: -1 }}>
-            Sports<span style={{ color: C.brand }}>IQ</span>
-          </div>
-          <div style={{
-            display: "inline-block", marginTop: 8,
-            background: C.brand, borderRadius: 8,
-            padding: "4px 14px", fontSize: 14, fontWeight: 700, color: "#fff",
-            fontFamily: FONT, letterSpacing: 1,
-          }}>BAR EDITION</div>
+        {/* Logo */}
+        <div style={{ fontSize: 38, fontWeight: 900, color: C.text, fontFamily: FONT, letterSpacing: -1 }}>
+          Sports<span style={{ color: C.brand }}>IQ</span>
         </div>
+
+        {/* Stats row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 40 }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ color: C.faint, fontSize: 13, fontWeight: 700, letterSpacing: 2, fontFamily: FONT }}>PLAYING TONIGHT</div>
+            <div style={{ color: C.text, fontSize: 28, fontWeight: 900, fontFamily: FONT, fontVariantNumeric: "tabular-nums" }}>
+              {leaderboard.length > 0 ? leaderboard.length : "—"}
+            </div>
+          </div>
+          <div style={{ width: 1, height: 36, background: "rgba(255,255,255,0.1)" }} />
+          <div style={{ textAlign: "center" }}>
+            <div style={{ color: C.faint, fontSize: 13, fontWeight: 700, letterSpacing: 2, fontFamily: FONT }}>NEXT TRIVIA</div>
+            <div style={{ color: C.teal, fontSize: 28, fontWeight: 900, fontFamily: FONT }}>SOON</div>
+          </div>
+          <div style={{ width: 1, height: 36, background: "rgba(255,255,255,0.1)" }} />
+          <LiveBadge />
+        </div>
+      </div>
+
+      {/* LEFT COL — QR + room code + "Download the app" */}
+      <div style={{
+        borderRight: "1px solid rgba(255,255,255,0.07)",
+        display: "flex", flexDirection: "column", alignItems: "center",
+        justifyContent: "center", gap: 28, padding: "48px 36px",
+      }}>
+        <div style={{
+          color: C.faint, fontSize: 14, fontWeight: 800, letterSpacing: 3,
+          fontFamily: FONT, textTransform: "uppercase",
+        }}>JOIN THE GAME</div>
 
         {qrDataUrl && (
           <div style={{
-            background: C.bgOuter, borderRadius: 20, padding: 16,
+            background: C.bgOuter, borderRadius: 20, padding: 14,
             border: `2px solid ${C.border}`,
           }}>
-            <img src={qrDataUrl} alt="Scan to join" style={{ width: 200, height: 200, display: "block", borderRadius: 8 }} />
+            <img src={qrDataUrl} alt="Scan to join" style={{ width: 180, height: 180, display: "block", borderRadius: 8 }} />
           </div>
         )}
 
-        <div style={{ textAlign: "center" }}>
-          <div style={{ color: C.faint, fontSize: 18, fontFamily: FONT, marginBottom: 8 }}>Or enter room code</div>
+        {/* Room code */}
+        <div style={{
+          border: `2px solid ${C.border}`,
+          borderRadius: 16, padding: "16px 32px", textAlign: "center",
+          background: "rgba(85,69,211,0.1)", width: "100%",
+        }}>
+          <div style={{ color: C.faint, fontSize: 13, fontFamily: FONT, letterSpacing: 1, marginBottom: 4 }}>ROOM CODE</div>
           <div style={{
-            color: C.text, fontSize: 42, fontWeight: 900,
+            color: C.text, fontSize: 44, fontWeight: 900,
             letterSpacing: 10, fontFamily: FONT, fontVariantNumeric: "tabular-nums",
           }}>{roomCode}</div>
         </div>
 
-        <div style={{ color: C.faint, fontSize: 18, fontFamily: FONT, textAlign: "center", lineHeight: 1.5 }}>
-          Scan to join the game<br />
-          <span style={{ color: C.teal }}>Free to play — win tonight</span>
+        <div style={{ color: C.faint, fontSize: 16, fontFamily: FONT, textAlign: "center", lineHeight: 1.5 }}>
+          sportsiq.app/join<br />
+          <span style={{ color: C.teal, fontSize: 14 }}>Free to play · Win IQ Points</span>
+        </div>
+
+        {/* App store badges row */}
+        <div style={{ display: "flex", gap: 10 }}>
+          {["App Store", "Google Play"].map((s) => (
+            <div key={s} style={{
+              background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 10, padding: "8px 16px",
+              color: C.muted, fontSize: 13, fontFamily: FONT, fontWeight: 700,
+            }}>{s}</div>
+          ))}
         </div>
       </div>
 
-      {/* Right: leaderboard */}
+      {/* CENTER COL — leaderboard */}
       <div style={{
-        flex: 1, display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center", gap: 48, padding: "80px 80px",
+        borderRight: "1px solid rgba(255,255,255,0.07)",
+        display: "flex", flexDirection: "column",
+        padding: "48px 48px",
+        overflow: "hidden",
       }}>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ color: C.muted, fontSize: 24, fontFamily: FONT, letterSpacing: 2, marginBottom: 12 }}>
-            TODAY'S LEADERS
+        {/* Header */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ color: C.text, fontSize: 20, fontWeight: 800, letterSpacing: 3, fontFamily: FONT }}>
+            TONIGHT'S LEADERBOARD
           </div>
-          <div style={{ width: 60, height: 3, background: `linear-gradient(90deg, ${C.brand}, ${C.teal})`, margin: "0 auto", borderRadius: 2 }} />
+          <div style={{ width: 80, height: 3, background: `linear-gradient(90deg, ${C.brand}, ${C.teal})`, marginTop: 8, borderRadius: 2 }} />
         </div>
 
         {leaderboard.length > 0 ? (
-          <div style={{ width: "100%", maxWidth: 640 }}>
-            {leaderboard.slice(0, 8).map((e, i) => (
-              <div key={e.rank} style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "18px 28px",
-                background: i === 0 ? C.brandAlpha : "rgba(255,255,255,0.03)",
-                border: `1px solid ${i === 0 ? C.border : C.cardBorder}`,
-                borderRadius: 14, marginBottom: 10, fontFamily: FONT,
-                animation: "fadeIn 0.4s ease both",
-                animationDelay: `${i * 0.06}s`,
-              }}>
-                <span style={{ color: i === 0 ? C.text : C.muted, fontSize: 26, fontWeight: i === 0 ? 800 : 500 }}>
-                  <span style={{ color: C.faint, marginRight: 14, fontSize: 20 }}>#{e.rank}</span>
-                  {e.displayName}
-                </span>
-                <span style={{ color: i === 0 ? C.brand : C.muted, fontWeight: 900, fontSize: 30, fontVariantNumeric: "tabular-nums" }}>
-                  {e.totalPoints.toLocaleString()} pts
-                </span>
-              </div>
-            ))}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {leaderboard.slice(0, 8).map((e, i) => {
+              const isGold   = i === 0;
+              const isSilver = i === 1;
+              const isBronze = i === 2;
+              const rowBg = isGold
+                ? "linear-gradient(90deg, rgba(255,193,7,0.18), rgba(255,193,7,0.06))"
+                : isSilver
+                  ? "rgba(148,163,184,0.08)"
+                  : isBronze
+                    ? "rgba(205,127,50,0.08)"
+                    : "rgba(255,255,255,0.03)";
+              const rowBorder = isGold
+                ? "rgba(255,193,7,0.35)"
+                : isSilver
+                  ? "rgba(148,163,184,0.2)"
+                  : isBronze
+                    ? "rgba(205,127,50,0.2)"
+                    : "rgba(255,255,255,0.06)";
+              const rankColor = isGold ? "#fbbf24" : isBronze ? "#cd7f32" : C.faint;
+              return (
+                <div key={e.rank} style={{
+                  display: "grid", gridTemplateColumns: "40px 1fr auto",
+                  alignItems: "center",
+                  padding: "14px 20px",
+                  background: rowBg,
+                  border: `1px solid ${rowBorder}`,
+                  borderRadius: 12,
+                  fontFamily: FONT,
+                  animation: "fadeIn 0.4s ease both",
+                  animationDelay: `${i * 0.06}s`,
+                }}>
+                  <span style={{ color: rankColor, fontSize: 20, fontWeight: 800 }}>#{e.rank}</span>
+                  <span style={{ color: isGold ? C.text : C.muted, fontSize: 24, fontWeight: isGold ? 800 : 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {e.displayName}
+                  </span>
+                  <span style={{ color: isGold ? "#fbbf24" : C.muted, fontWeight: 900, fontSize: 24, fontVariantNumeric: "tabular-nums", textAlign: "right" }}>
+                    {e.totalPoints.toLocaleString()} <span style={{ fontSize: 14, fontWeight: 600 }}>IQ PTS</span>
+                  </span>
+                </div>
+              );
+            })}
           </div>
         ) : (
-          <div style={{ color: C.faint, fontSize: 32, fontFamily: FONT, textAlign: "center" }}>
-            Be the first to score tonight
+          <div style={{
+            flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <div style={{ color: C.faint, fontSize: 28, fontFamily: FONT, textAlign: "center" }}>
+              Be the first on the board tonight
+            </div>
           </div>
         )}
+      </div>
+
+      {/* RIGHT COL — CTA panel */}
+      <div style={{
+        display: "flex", flexDirection: "column", alignItems: "center",
+        justifyContent: "center", gap: 24, padding: "48px 40px", textAlign: "center",
+      }}>
+        <div style={{
+          color: C.teal, fontSize: 14, fontWeight: 800, letterSpacing: 3,
+          fontFamily: FONT, textTransform: "uppercase",
+        }}>FREE TO PLAY</div>
+
+        <div style={{
+          color: C.text, fontSize: 52, fontWeight: 900, fontFamily: FONT,
+          lineHeight: 1.1, letterSpacing: -1,
+        }}>
+          Win IQ points<br />
+          <span style={{ color: C.teal }}>at this bar</span><br />
+          tonight
+        </div>
+
+        <div style={{
+          background: "rgba(34,140,136,0.12)",
+          border: "1px solid rgba(34,140,136,0.3)",
+          borderRadius: 16, padding: "18px 28px",
+          color: C.muted, fontSize: 18, fontFamily: FONT, lineHeight: 1.6,
+        }}>
+          Answer trivia questions &amp; predict<br />
+          player stats to climb the leaderboard
+        </div>
+
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10,
+          color: C.faint, fontSize: 16, fontFamily: FONT,
+        }}>
+          <span style={{ fontSize: 20 }}>🏆</span>
+          Top players earn prizes &amp; bragging rights
+        </div>
       </div>
     </div>
   );
@@ -511,18 +623,25 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
     const urgent = countdown <= 5;
     return (
       <div style={{
-        padding: "64px 80px", height: "100vh",
-        display: "flex", flexDirection: "column", gap: 36,
+        height: "100vh",
+        display: "grid",
+        gridTemplateRows: "auto 1fr auto",
         background: C.bgOuter,
       }}>
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-            <LiveBadge label="TRIVIA" />
-            <div style={{ color: C.faint, fontSize: 22, fontFamily: FONT }}>
+        {/* Full-width header bar */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: "rgba(0,0,0,0.25)",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          padding: "18px 64px",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+            <LiveBadge label="LIVE TRIVIA" />
+            <div style={{ color: C.faint, fontSize: 24, fontFamily: FONT }}>
               Q{triviaQ.questionNumber} of {triviaQ.totalQuestions}
             </div>
           </div>
+
           {/* Countdown */}
           <div style={{
             background: urgent ? C.redAlpha : C.bgPanel,
@@ -537,18 +656,22 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
               animation: urgent ? "pulse 0.8s ease infinite" : "none",
             }}>{countdown}</span>
           </div>
+
+          <div style={{ color: C.faint, fontSize: 22, fontFamily: FONT }}>
+            {total} players answered
+          </div>
         </div>
 
         {/* Question */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", padding: "32px 80px" }}>
           <div style={{
-            fontSize: 54, fontWeight: 800, color: C.text,
-            lineHeight: 1.3, fontFamily: FONT,
+            fontSize: 60, fontWeight: 800, color: C.text,
+            lineHeight: 1.25, fontFamily: FONT,
           }}>{triviaQ.question}</div>
         </div>
 
         {/* Options — horizontal fill bars */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "0 80px 48px" }}>
           {(["A", "B", "C", "D"] as const).map((opt) => {
             const p = total > 0 && answerCounts ? pct(answerCounts[opt], total) : 0;
             return (
@@ -581,10 +704,6 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
             );
           })}
         </div>
-
-        <div style={{ textAlign: "center", color: C.faint, fontSize: 22, fontFamily: FONT }}>
-          {total} players answered · Lock in on the SportsiQ app
-        </div>
       </div>
     );
   };
@@ -601,15 +720,16 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
             {triviaQ.question}
           </div>
 
-          {/* Correct answer highlight */}
+          {/* Correct answer highlight — bigger and more dramatic */}
           <div style={{
-            display: "flex", alignItems: "center", gap: 16,
-            background: C.greenAlpha,
+            display: "flex", alignItems: "center", gap: 20,
+            background: `linear-gradient(135deg, rgba(34,197,94,0.22) 0%, rgba(34,197,94,0.08) 100%)`,
             border: `2px solid ${C.green}`,
-            borderRadius: 16, padding: "20px 32px",
+            borderRadius: 20, padding: "28px 40px",
+            boxShadow: `0 0 40px rgba(34,197,94,0.15)`,
           }}>
-            <span style={{ fontSize: 36 }}>✅</span>
-            <span style={{ color: C.green, fontSize: 36, fontWeight: 900, fontFamily: FONT }}>
+            <span style={{ fontSize: 52 }}>✅</span>
+            <span style={{ color: C.green, fontSize: 48, fontWeight: 900, fontFamily: FONT, lineHeight: 1.2 }}>
               {triviaQ.options[triviaRev.correctAnswer]}
             </span>
           </div>
@@ -638,8 +758,54 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
           )}
         </div>
 
-        {/* Right: leaderboard */}
-        {leaderboard.length > 0 && <LeaderboardPanel entries={leaderboard} />}
+        {/* Right: leaderboard with gold/silver/bronze */}
+        {leaderboard.length > 0 && (
+          <div style={{ width: 380, display: "flex", flexDirection: "column", gap: 0 }}>
+            <div style={{
+              color: C.faint, fontSize: 18, fontWeight: 700, letterSpacing: 3,
+              fontFamily: FONT, marginBottom: 16, textTransform: "uppercase",
+            }}>Tonight's Leaders</div>
+            {leaderboard.slice(0, 5).map((e, i) => {
+              const isGold   = i === 0;
+              const isSilver = i === 1;
+              const isBronze = i === 2;
+              const rowBg = isGold
+                ? "linear-gradient(90deg, rgba(255,193,7,0.18), rgba(255,193,7,0.06))"
+                : isSilver
+                  ? "rgba(148,163,184,0.08)"
+                  : isBronze
+                    ? "rgba(205,127,50,0.08)"
+                    : "rgba(255,255,255,0.03)";
+              const rowBorder = isGold
+                ? "rgba(255,193,7,0.35)"
+                : isSilver
+                  ? "rgba(148,163,184,0.2)"
+                  : isBronze
+                    ? "rgba(205,127,50,0.2)"
+                    : C.cardBorder;
+              const rankColor = isGold ? "#fbbf24" : isBronze ? "#cd7f32" : C.faint;
+              return (
+                <div key={e.rank} style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "14px 20px",
+                  background: rowBg,
+                  border: `1px solid ${rowBorder}`,
+                  borderRadius: 12,
+                  marginBottom: 8,
+                  fontFamily: FONT,
+                }}>
+                  <span style={{ color: isGold ? C.text : C.muted, fontSize: 24, fontWeight: isGold ? 800 : 600 }}>
+                    <span style={{ color: rankColor, marginRight: 10, fontSize: 20 }}>#{e.rank}</span>
+                    {e.displayName}
+                  </span>
+                  <span style={{ color: isGold ? "#fbbf24" : C.muted, fontWeight: 900, fontSize: 26, fontVariantNumeric: "tabular-nums" }}>
+                    {e.totalPoints.toLocaleString()}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     );
   };
@@ -653,96 +819,246 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
     const colorA = predQ.teamColorHome ?? C.brand;
     const colorB = predQ.teamColorAway ?? C.teal;
 
+    // Circular countdown ring
+    const circumference = 2 * Math.PI * 44; // ≈ 276
+    const totalSeconds = 60; // default pick window; ring resets each new question
+    const dashOffset = circumference * (1 - countdown / totalSeconds);
+
+    // Over percentage for tug bar
+    const overPct = crowd ? crowd.morePercent : 68;
+    const totalPicks = crowd ? crowd.more + crowd.less : 0;
+    const overIsWinning = (crowd?.morePercent ?? 68) >= 50;
+
     return (
       <div style={{
-        padding: "64px 80px", height: "100vh",
-        display: "flex", flexDirection: "column", justifyContent: "center", gap: 36,
+        height: "100vh",
+        display: "grid",
+        gridTemplateColumns: "1fr 1.4fr 320px",
         background: teamGradient(colorA, colorB),
+        fontFamily: FONT,
+        overflow: "hidden",
       }}>
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <LiveBadge label="LIVE PREDICTION" />
-          <div style={{
-            background: C.bgPanel, border: `2px solid ${C.border}`,
-            borderRadius: 18, padding: "10px 32px",
-          }}>
-            <span style={{ color: C.text, fontSize: 32, fontWeight: 900, fontFamily: FONT, fontVariantNumeric: "tabular-nums" }}>
-              Locks in {countdown}s
-            </span>
-          </div>
-        </div>
 
-        {/* Player + stat line — hero element */}
-        <div style={{ textAlign: "center", animation: "fadeIn 0.5s ease" }}>
-          <div style={{ color: C.muted, fontSize: 30, fontFamily: FONT, marginBottom: 4 }}>
+        {/* LEFT COL — player identity */}
+        <div style={{
+          borderRight: "1px solid rgba(255,255,255,0.07)",
+          display: "flex", flexDirection: "column", justifyContent: "center",
+          padding: "56px 48px", gap: 20,
+        }}>
+          {/* Live badge */}
+          <div style={{ marginBottom: 8 }}>
+            <LiveBadge label="LIVE NOW" />
+          </div>
+
+          {/* Team name */}
+          <div style={{
+            color: "#64748b", fontSize: 18, fontWeight: 700,
+            letterSpacing: 2, textTransform: "uppercase", fontFamily: FONT,
+          }}>
             {predQ.teamName}
           </div>
-          <div style={{ color: C.text, fontSize: 80, fontWeight: 900, fontFamily: FONT, lineHeight: 1 }}>
+
+          {/* Player name — hero text */}
+          <div style={{
+            color: C.text, fontSize: 88, fontWeight: 900, fontFamily: FONT,
+            letterSpacing: -3, lineHeight: 0.92,
+          }}>
             {predQ.playerName}
           </div>
-          <div style={{ color: C.faint, fontSize: 36, fontFamily: FONT, margin: "12px 0" }}>
-            OVER or UNDER
-          </div>
-          <div style={{
-            color: C.text, fontSize: 128, fontWeight: 900, fontFamily: FONT,
-            fontVariantNumeric: "tabular-nums", lineHeight: 1,
-          }}>
-            {predQ.statLine}
-          </div>
-          <div style={{ color: C.muted, fontSize: 40, fontFamily: FONT, marginTop: 4 }}>
-            {predQ.statLabel}
-          </div>
-        </div>
 
-        {/* SportsiQ probability context */}
-        <div style={{
-          display: "flex", justifyContent: "center", alignItems: "center", gap: 12,
-          background: "rgba(0,0,0,0.25)", borderRadius: 12, padding: "12px 28px",
-          alignSelf: "center",
-        }}>
-          <span style={{ fontSize: 24 }}>📊</span>
-          <span style={{ color: C.muted, fontSize: 26, fontFamily: FONT }}>
-            SportsiQ Intelligence:{" "}
-            <span style={{ color: C.text, fontWeight: 700 }}>
-              {probPct}% chance OVER
+          {/* Stat line */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginTop: 8 }}>
+            <span style={{
+              color: "#6366f1", fontSize: 72, fontWeight: 900,
+              fontFamily: FONT, fontVariantNumeric: "tabular-nums",
+            }}>{predQ.statLine}</span>
+            <span style={{ color: "#94a3b8", fontSize: 26, fontFamily: FONT }}>
+              {predQ.statLabel}
             </span>
-          </span>
+          </div>
+
+          {/* Context card */}
+          <div style={{
+            borderLeft: "4px solid #6366f1",
+            background: "rgba(99,102,241,0.08)",
+            borderRadius: "0 12px 12px 0",
+            padding: "14px 20px",
+            color: "#94a3b8", fontSize: 20, fontFamily: FONT, lineHeight: 1.5,
+          }}>
+            Has cleared this line in {probPct} of recent games
+          </div>
+
+          {/* SportsIQ Signal */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
+            <div style={{
+              width: 10, height: 10, borderRadius: "50%",
+              background: C.amber, boxShadow: `0 0 8px ${C.amber}`,
+            }} />
+            <span style={{ color: C.amber, fontSize: 18, fontWeight: 700, fontFamily: FONT }}>
+              SportsIQ Signal:{" "}
+              <span style={{ fontWeight: 500 }}>
+                Moderate Lean {probPct >= 50 ? "OVER" : "UNDER"}
+              </span>
+            </span>
+          </div>
         </div>
 
-        {/* Crowd split — UNDER left, OVER right — updates live */}
-        {crowd ? (
-          <div style={{ display: "flex", gap: 24 }}>
-            <div style={{
-              flex: 1, background: C.tealAlpha,
-              border: `2px solid ${C.teal}`,
-              borderRadius: 20, padding: "24px 32px", textAlign: "center",
-            }}>
-              <div style={{ color: C.teal, fontSize: 44, fontWeight: 900, fontFamily: FONT }}>UNDER ↓</div>
-              <div style={{ color: C.text, fontSize: 60, fontWeight: 900, fontFamily: FONT, fontVariantNumeric: "tabular-nums" }}>
-                {crowd.lessPercent}%
-              </div>
-              <div style={{ color: C.faint, fontSize: 24, fontFamily: FONT }}>{crowd.less} players</div>
-            </div>
-            <div style={{
-              flex: 1, background: C.brandAlpha,
-              border: `2px solid ${C.brand}`,
-              borderRadius: 20, padding: "24px 32px", textAlign: "center",
-            }}>
-              <div style={{ color: C.brand, fontSize: 44, fontWeight: 900, fontFamily: FONT }}>OVER ↑</div>
-              <div style={{ color: C.text, fontSize: 60, fontWeight: 900, fontFamily: FONT, fontVariantNumeric: "tabular-nums" }}>
-                {crowd.morePercent}%
-              </div>
-              <div style={{ color: C.faint, fontSize: 24, fontFamily: FONT }}>{crowd.more} players</div>
-            </div>
+        {/* CENTER COL — crowd split hero */}
+        <div style={{
+          borderRight: "1px solid rgba(255,255,255,0.07)",
+          display: "flex", flexDirection: "column", justifyContent: "center",
+          padding: "56px 48px", gap: 28,
+        }}>
+          {/* Label */}
+          <div style={{
+            color: C.faint, fontSize: 26, fontWeight: 700,
+            letterSpacing: 3, textTransform: "uppercase", fontFamily: FONT,
+            textAlign: "center",
+          }}>
+            {overIsWinning ? "OVER" : "UNDER"} leading
           </div>
-        ) : (
-          <div style={{ textAlign: "center", color: C.faint, fontSize: 28, fontFamily: FONT }}>
-            Waiting for picks...
-          </div>
-        )}
 
-        <div style={{ textAlign: "center", color: C.faint, fontSize: 26, fontFamily: FONT }}>
-          Open SportsiQ to lock in your pick · Bar plays count 2×
+          {/* Two big cards */}
+          <div style={{ display: "flex", gap: 16 }}>
+            {/* OVER card */}
+            <div style={{
+              flex: 1,
+              background: "linear-gradient(160deg, rgba(99,102,241,0.18), rgba(99,102,241,0.06))",
+              border: "2px solid rgba(99,102,241,0.5)",
+              borderRadius: 24, padding: "28px 24px", textAlign: "center",
+            }}>
+              <div style={{ color: "#818cf8", fontSize: 32, fontWeight: 700, fontFamily: FONT, marginBottom: 8 }}>
+                OVER ↑
+              </div>
+              <div style={{
+                color: C.text, fontSize: 96, fontWeight: 900, fontFamily: FONT,
+                fontVariantNumeric: "tabular-nums", lineHeight: 1,
+              }}>
+                {crowd ? crowd.morePercent : "—"}%
+              </div>
+              <div style={{ color: "#64748b", fontSize: 20, fontFamily: FONT, marginTop: 8 }}>
+                {crowd ? crowd.more : 0} players
+              </div>
+            </div>
+
+            {/* UNDER card */}
+            <div style={{
+              flex: 1,
+              background: "rgba(255,255,255,0.03)",
+              border: "2px solid rgba(255,255,255,0.1)",
+              borderRadius: 24, padding: "28px 24px", textAlign: "center",
+            }}>
+              <div style={{ color: C.muted, fontSize: 32, fontWeight: 700, fontFamily: FONT, marginBottom: 8 }}>
+                UNDER ↓
+              </div>
+              <div style={{
+                color: C.text, fontSize: 96, fontWeight: 900, fontFamily: FONT,
+                fontVariantNumeric: "tabular-nums", lineHeight: 1,
+              }}>
+                {crowd ? crowd.lessPercent : "—"}%
+              </div>
+              <div style={{ color: "#64748b", fontSize: 20, fontFamily: FONT, marginTop: 8 }}>
+                {crowd ? crowd.less : 0} players
+              </div>
+            </div>
+          </div>
+
+          {/* Tug-of-war bar */}
+          <div>
+            <div style={{
+              height: 16, borderRadius: 8,
+              background: "rgba(255,255,255,0.06)",
+              overflow: "hidden",
+            }}>
+              <div style={{
+                height: "100%",
+                width: `${overPct}%`,
+                background: "linear-gradient(90deg, #6366f1, #818cf8)",
+                borderRadius: 8,
+                transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
+              }} />
+            </div>
+            <div style={{
+              display: "flex", justifyContent: "space-between",
+              marginTop: 8, fontFamily: FONT,
+            }}>
+              <span style={{ color: "#818cf8", fontSize: 18, fontWeight: 700 }}>
+                OVER {overIsWinning ? "winning" : ""}
+              </span>
+              <span style={{ color: C.faint, fontSize: 18 }}>
+                {totalPicks} total picks
+              </span>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div style={{
+            textAlign: "center", color: C.faint, fontSize: 20, fontFamily: FONT,
+            background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: "14px",
+          }}>
+            Scan to pick from your phone · Free to play
+          </div>
+        </div>
+
+        {/* RIGHT COL — timer + QR */}
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center",
+          justifyContent: "center", gap: 32, padding: "48px 28px",
+        }}>
+          {/* LOCKS IN label */}
+          <div style={{
+            color: C.faint, fontSize: 14, fontWeight: 800,
+            letterSpacing: 3, textTransform: "uppercase", fontFamily: FONT,
+          }}>LOCKS IN</div>
+
+          {/* Circular countdown */}
+          <div style={{ position: "relative", width: 160, height: 160 }}>
+            <svg width="160" height="160" style={{ position: "absolute", top: 0, left: 0 }}>
+              <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+              <circle
+                cx="80" cy="80" r="70" fill="none"
+                stroke="#ef4444" strokeWidth="8"
+                strokeDasharray={`${circumference}`}
+                strokeDashoffset={`${dashOffset}`}
+                transform="rotate(-90 80 80)"
+                style={{ transition: "stroke-dashoffset 1s linear" }}
+              />
+            </svg>
+            <div style={{
+              position: "absolute", inset: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <span style={{
+                color: "#ef4444", fontSize: 42, fontWeight: 900,
+                fontFamily: FONT, fontVariantNumeric: "tabular-nums",
+              }}>{countdown}</span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div style={{ width: "80%", height: 1, background: "rgba(255,255,255,0.08)" }} />
+
+          {/* SCAN TO JOIN label */}
+          <div style={{
+            color: C.faint, fontSize: 13, fontWeight: 800,
+            letterSpacing: 3, textTransform: "uppercase", fontFamily: FONT,
+          }}>SCAN TO JOIN</div>
+
+          {/* QR code */}
+          {qrDataUrl && (
+            <div style={{
+              background: C.bgOuter, borderRadius: 16, padding: 12,
+              border: `2px solid ${C.border}`,
+            }}>
+              <img src={qrDataUrl} alt="Join" style={{ width: 120, height: 120, display: "block", borderRadius: 6 }} />
+            </div>
+          )}
+
+          {/* Room code */}
+          <div style={{
+            color: C.text, fontSize: 28, fontWeight: 900,
+            letterSpacing: 8, fontFamily: FONT, fontVariantNumeric: "tabular-nums",
+          }}>{roomCode}</div>
         </div>
       </div>
     );
