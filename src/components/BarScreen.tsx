@@ -621,88 +621,137 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
     if (!triviaQ) return null;
     const total = totalAnswers;
     const urgent = countdown <= 5;
+    // Progress pill dots
+    const dots = Array.from({ length: triviaQ.totalQuestions }, (_, i) => i);
     return (
       <div style={{
         height: "100vh",
-        display: "grid",
-        gridTemplateRows: "auto 1fr auto",
-        background: C.bgOuter,
+        display: "flex", flexDirection: "column",
+        background: `radial-gradient(ellipse at top, rgba(85,69,211,0.18) 0%, transparent 60%), ${C.bgOuter}`,
+        fontFamily: FONT,
+        overflow: "hidden",
       }}>
-        {/* Full-width header bar */}
+        {/* ── Header bar ── */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          background: "rgba(0,0,0,0.25)",
+          background: "rgba(0,0,0,0.30)",
           borderBottom: "1px solid rgba(255,255,255,0.07)",
-          padding: "18px 64px",
+          padding: "16px 64px",
+          flexShrink: 0,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          {/* Left: live badge + progress dots */}
+          <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
             <LiveBadge label="LIVE TRIVIA" />
-            <div style={{ color: C.faint, fontSize: 24, fontFamily: FONT }}>
-              Q{triviaQ.questionNumber} of {triviaQ.totalQuestions}
+            <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+              {dots.map((_, i) => (
+                <div key={i} style={{
+                  width: i === triviaQ.questionNumber - 1 ? 22 : 8,
+                  height: 8, borderRadius: 4,
+                  background: i < triviaQ.questionNumber - 1
+                    ? C.teal
+                    : i === triviaQ.questionNumber - 1
+                      ? C.brand
+                      : "rgba(255,255,255,0.12)",
+                  transition: "all 0.3s ease",
+                }} />
+              ))}
+            </div>
+            <div style={{ color: C.faint, fontSize: 20, fontFamily: FONT }}>
+              Q{triviaQ.questionNumber} / {triviaQ.totalQuestions}
             </div>
           </div>
 
-          {/* Countdown */}
+          {/* Center: countdown */}
           <div style={{
-            background: urgent ? C.redAlpha : C.bgPanel,
-            border: `2px solid ${urgent ? C.red : C.border}`,
-            borderRadius: 18, padding: "10px 32px",
+            background: urgent ? C.redAlpha : "rgba(85,69,211,0.20)",
+            border: `2px solid ${urgent ? C.red : C.brand}`,
+            borderRadius: 20, padding: "6px 40px",
             transition: "all 0.3s ease",
           }}>
             <span style={{
               color: urgent ? C.red : C.text,
-              fontSize: 64, fontWeight: 900, fontFamily: FONT,
-              fontVariantNumeric: "tabular-nums",
-              animation: urgent ? "pulse 0.8s ease infinite" : "none",
+              fontSize: 72, fontWeight: 900, fontFamily: FONT,
+              fontVariantNumeric: "tabular-nums", lineHeight: 1,
+              animation: urgent ? "pulse 0.6s ease infinite" : "none",
             }}>{countdown}</span>
           </div>
 
-          <div style={{ color: C.faint, fontSize: 22, fontFamily: FONT }}>
-            {total} players answered
+          {/* Right: player count */}
+          <div style={{ textAlign: "right" }}>
+            <div style={{ color: C.text, fontSize: 32, fontWeight: 800, fontVariantNumeric: "tabular-nums" }}>{total}</div>
+            <div style={{ color: C.faint, fontSize: 14, letterSpacing: 1.5 }}>ANSWERING</div>
           </div>
         </div>
 
-        {/* Question */}
-        <div style={{ display: "flex", alignItems: "center", padding: "32px 80px" }}>
-          <div style={{
-            fontSize: 60, fontWeight: 800, color: C.text,
-            lineHeight: 1.25, fontFamily: FONT,
-          }}>{triviaQ.question}</div>
-        </div>
+        {/* ── Body: 2-column (question left · answer cards right) ── */}
+        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", overflow: "hidden" }}>
 
-        {/* Options — horizontal fill bars */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 14, padding: "0 80px 48px" }}>
-          {(["A", "B", "C", "D"] as const).map((opt) => {
-            const p = total > 0 && answerCounts ? pct(answerCounts[opt], total) : 0;
-            return (
-              <div key={opt} style={{ display: "flex", alignItems: "center", gap: 20 }}>
-                {/* Label */}
-                <div style={{ width: 52, color: C.faint, fontSize: 32, fontWeight: 800, fontFamily: FONT, flexShrink: 0 }}>{opt}</div>
-                {/* Answer text + fill bar stacked */}
-                <div style={{ flex: 1 }}>
-                  <div style={{ color: C.text, fontSize: 26, fontWeight: 600, fontFamily: FONT, marginBottom: 6 }}>
-                    {triviaQ.options[opt]}
-                  </div>
-                  <div style={{ height: 10, background: C.bgPanel, borderRadius: 6, overflow: "hidden", border: `1px solid ${C.cardBorder}` }}>
+          {/* Left: Question */}
+          <div style={{
+            display: "flex", alignItems: "center",
+            padding: "48px 56px 48px 80px",
+            borderRight: "1px solid rgba(255,255,255,0.06)",
+          }}>
+            <div style={{
+              fontSize: 54, fontWeight: 800, color: C.text,
+              lineHeight: 1.3, fontFamily: FONT,
+            }}>{triviaQ.question}</div>
+          </div>
+
+          {/* Right: Answer cards with flood-fill crowd indicator */}
+          <div style={{
+            display: "flex", flexDirection: "column",
+            padding: "28px 64px 28px 44px",
+            gap: 12, justifyContent: "center",
+          }}>
+            {(["A", "B", "C", "D"] as const).map((opt) => {
+              const p = total > 0 && answerCounts ? pct(answerCounts[opt], total) : 0;
+              return (
+                <div key={opt} style={{
+                  position: "relative",
+                  display: "flex", alignItems: "center", gap: 18,
+                  background: C.bgPanel,
+                  border: `1px solid ${C.cardBorder}`,
+                  borderRadius: 16,
+                  padding: "20px 24px",
+                  overflow: "hidden",
+                  minHeight: 80,
+                }}>
+                  {/* Flood-fill background — grows as votes arrive */}
+                  <div style={{
+                    position: "absolute", inset: "0 auto 0 0",
+                    width: `${p}%`,
+                    background: "rgba(85,69,211,0.28)",
+                    borderRadius: 16,
+                    transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
+                  }} />
+                  {/* Letter badge */}
+                  <div style={{
+                    position: "relative", flexShrink: 0,
+                    width: 48, height: 48,
+                    background: "rgba(255,255,255,0.08)",
+                    borderRadius: 10,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: C.muted, fontSize: 22, fontWeight: 900,
+                  }}>{opt}</div>
+                  {/* Answer text */}
+                  <div style={{
+                    position: "relative", flex: 1,
+                    color: C.text, fontSize: 24, fontWeight: 600,
+                    fontFamily: FONT, lineHeight: 1.3,
+                  }}>{triviaQ.options[opt]}</div>
+                  {/* Live percentage */}
+                  {total > 0 && (
                     <div style={{
-                      height: "100%",
-                      width: `${p}%`,
-                      background: "rgba(255,255,255,0.18)",
-                      borderRadius: 6,
-                      transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)",
-                    }} />
-                  </div>
+                      position: "relative", flexShrink: 0,
+                      color: C.muted, fontSize: 30, fontWeight: 900,
+                      fontVariantNumeric: "tabular-nums",
+                    }}>{p}%</div>
+                  )}
                 </div>
-                {/* Percentage */}
-                <div style={{
-                  width: 88, textAlign: "right",
-                  color: total > 0 ? C.text : C.faint,
-                  fontSize: 32, fontWeight: 900, fontFamily: FONT,
-                  fontVariantNumeric: "tabular-nums", flexShrink: 0,
-                }}>{p}%</div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -712,100 +761,164 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
   const TriviaRevealScreen = () => {
     if (!triviaRev || !triviaQ) return null;
     const total = triviaRev.totalAnswers;
+    const correctCount = triviaRev.answerCounts[triviaRev.correctAnswer];
+    const correctPct = pct(correctCount, total);
     return (
-      <div style={{ padding: "64px 80px", height: "100vh", display: "flex", gap: 60, background: C.bgOuter }}>
-        {/* Left: question + bars */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 28 }}>
-          <div style={{ color: C.muted, fontSize: 32, fontFamily: FONT, lineHeight: 1.35 }}>
-            {triviaQ.question}
-          </div>
-
-          {/* Correct answer highlight — bigger and more dramatic */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: 20,
-            background: `linear-gradient(135deg, rgba(34,197,94,0.22) 0%, rgba(34,197,94,0.08) 100%)`,
-            border: `2px solid ${C.green}`,
-            borderRadius: 20, padding: "28px 40px",
-            boxShadow: `0 0 40px rgba(34,197,94,0.15)`,
-          }}>
-            <span style={{ fontSize: 52 }}>✅</span>
-            <span style={{ color: C.green, fontSize: 48, fontWeight: 900, fontFamily: FONT, lineHeight: 1.2 }}>
-              {triviaQ.options[triviaRev.correctAnswer]}
-            </span>
-          </div>
-
-          <div style={{ flex: 1 }}>
-            {(["A", "B", "C", "D"] as const).map((opt) => (
-              <PctBar
-                key={opt}
-                label={opt}
-                count={triviaRev.answerCounts[opt]}
-                total={total}
-                highlight={opt === triviaRev.correctAnswer}
-              />
-            ))}
-          </div>
-
-          {triviaRev.funFact && (
+      <div style={{
+        height: "100vh", display: "flex", flexDirection: "column",
+        background: `radial-gradient(ellipse at top left, rgba(34,197,94,0.10) 0%, transparent 55%), ${C.bgOuter}`,
+        fontFamily: FONT, overflow: "hidden",
+      }}>
+        {/* ── Header bar — consistent with TriviaQ ── */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: "rgba(0,0,0,0.30)",
+          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          padding: "16px 64px", flexShrink: 0,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
             <div style={{
-              background: C.bgPanel, border: `1px solid ${C.cardBorder}`,
-              borderRadius: 14, padding: "18px 26px",
-              color: C.muted, fontSize: 22, fontStyle: "italic", fontFamily: FONT,
-              lineHeight: 1.5,
+              background: C.tealAlpha, border: `1px solid ${C.teal}`,
+              borderRadius: 12, padding: "8px 22px",
+              color: C.teal, fontSize: 20, fontWeight: 800, letterSpacing: 2,
+            }}>ANSWER REVEALED</div>
+            <div style={{ color: C.faint, fontSize: 20 }}>
+              Q{triviaQ.questionNumber} / {triviaQ.totalQuestions}
+            </div>
+          </div>
+          {/* Correct % stat */}
+          <div style={{ textAlign: "right" }}>
+            <div style={{ color: C.green, fontSize: 36, fontWeight: 900, fontVariantNumeric: "tabular-nums" }}>{correctPct}%</div>
+            <div style={{ color: C.faint, fontSize: 14, letterSpacing: 1.5 }}>GOT IT RIGHT</div>
+          </div>
+        </div>
+
+        {/* ── Body: question+answers left · leaderboard right ── */}
+        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 380px", overflow: "hidden" }}>
+
+          {/* Left: question + flood-fill answer cards */}
+          <div style={{ display: "flex", flexDirection: "column", padding: "36px 48px 36px 80px", gap: 20 }}>
+            <div style={{ color: C.muted, fontSize: 28, fontFamily: FONT, lineHeight: 1.4, flexShrink: 0 }}>
+              {triviaQ.question}
+            </div>
+
+            {/* Answer cards — same flood-fill pattern as TriviaQ, correct glows green */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10, justifyContent: "center" }}>
+              {(["A", "B", "C", "D"] as const).map((opt) => {
+                const isCorrect = opt === triviaRev.correctAnswer;
+                const p = pct(triviaRev.answerCounts[opt], total);
+                return (
+                  <div key={opt} style={{
+                    position: "relative",
+                    display: "flex", alignItems: "center", gap: 18,
+                    background: isCorrect ? "rgba(34,197,94,0.08)" : C.bgPanel,
+                    border: `2px solid ${isCorrect ? C.green : C.cardBorder}`,
+                    borderRadius: 14, padding: "16px 24px",
+                    overflow: "hidden", minHeight: 72,
+                    boxShadow: isCorrect ? "0 0 32px rgba(34,197,94,0.15)" : "none",
+                    transition: "all 0.4s ease",
+                  }}>
+                    {/* Flood fill */}
+                    <div style={{
+                      position: "absolute", inset: "0 auto 0 0",
+                      width: `${p}%`,
+                      background: isCorrect ? "rgba(34,197,94,0.20)" : "rgba(255,255,255,0.05)",
+                      borderRadius: 14,
+                      transition: "width 0.8s cubic-bezier(0.4,0,0.2,1)",
+                    }} />
+                    {/* Letter / checkmark */}
+                    <div style={{
+                      position: "relative", flexShrink: 0,
+                      width: 44, height: 44, borderRadius: 10,
+                      background: isCorrect ? "rgba(34,197,94,0.25)" : "rgba(255,255,255,0.06)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: isCorrect ? C.green : C.faint,
+                      fontSize: isCorrect ? 26 : 20, fontWeight: 900,
+                    }}>{isCorrect ? "✓" : opt}</div>
+                    {/* Answer text */}
+                    <div style={{
+                      position: "relative", flex: 1,
+                      color: isCorrect ? C.text : C.muted,
+                      fontSize: isCorrect ? 26 : 22,
+                      fontWeight: isCorrect ? 800 : 500,
+                      fontFamily: FONT, lineHeight: 1.3,
+                    }}>{triviaQ.options[opt]}</div>
+                    {/* Percentage */}
+                    <div style={{
+                      position: "relative", flexShrink: 0,
+                      color: isCorrect ? C.green : C.faint,
+                      fontSize: 30, fontWeight: 900,
+                      fontVariantNumeric: "tabular-nums",
+                    }}>{p}%</div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Fun fact — indigo/teal gradient treatment */}
+            {triviaRev.funFact && (
+              <div style={{
+                background: "linear-gradient(135deg, rgba(85,69,211,0.15), rgba(34,140,136,0.10))",
+                border: "1px solid rgba(85,69,211,0.25)",
+                borderRadius: 14, padding: "16px 24px",
+                display: "flex", gap: 16, alignItems: "flex-start", flexShrink: 0,
+              }}>
+                <span style={{ fontSize: 26, flexShrink: 0 }}>💡</span>
+                <div style={{ color: C.muted, fontSize: 21, fontFamily: FONT, lineHeight: 1.5 }}>
+                  {triviaRev.funFact}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right: gold/silver/bronze leaderboard */}
+          {leaderboard.length > 0 && (
+            <div style={{
+              borderLeft: "1px solid rgba(255,255,255,0.06)",
+              display: "flex", flexDirection: "column",
+              padding: "36px 40px 36px 32px",
             }}>
-              💡 {triviaRev.funFact}
+              <div style={{
+                color: C.faint, fontSize: 14, fontWeight: 700, letterSpacing: 3,
+                fontFamily: FONT, marginBottom: 20, textTransform: "uppercase",
+              }}>Tonight's Leaders</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {leaderboard.slice(0, 5).map((e, i) => {
+                  const isGold   = i === 0;
+                  const isSilver = i === 1;
+                  const isBronze = i === 2;
+                  const rowBg = isGold
+                    ? "linear-gradient(90deg, rgba(255,193,7,0.18), rgba(255,193,7,0.06))"
+                    : isSilver ? "rgba(148,163,184,0.08)"
+                    : isBronze ? "rgba(205,127,50,0.08)"
+                    : "rgba(255,255,255,0.03)";
+                  const rowBorder = isGold ? "rgba(255,193,7,0.35)"
+                    : isSilver ? "rgba(148,163,184,0.2)"
+                    : isBronze ? "rgba(205,127,50,0.2)"
+                    : C.cardBorder;
+                  const rankColor = isGold ? "#fbbf24" : isBronze ? "#cd7f32" : C.faint;
+                  return (
+                    <div key={e.rank} style={{
+                      display: "grid", gridTemplateColumns: "36px 1fr auto",
+                      alignItems: "center",
+                      padding: "12px 16px",
+                      background: rowBg, border: `1px solid ${rowBorder}`,
+                      borderRadius: 12, fontFamily: FONT,
+                    }}>
+                      <span style={{ color: rankColor, fontSize: 16, fontWeight: 800 }}>#{e.rank}</span>
+                      <span style={{ color: isGold ? C.text : C.muted, fontSize: 20, fontWeight: isGold ? 800 : 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {e.displayName}
+                      </span>
+                      <span style={{ color: isGold ? "#fbbf24" : C.muted, fontWeight: 900, fontSize: 20, fontVariantNumeric: "tabular-nums" }}>
+                        {e.totalPoints.toLocaleString()}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
-
-        {/* Right: leaderboard with gold/silver/bronze */}
-        {leaderboard.length > 0 && (
-          <div style={{ width: 380, display: "flex", flexDirection: "column", gap: 0 }}>
-            <div style={{
-              color: C.faint, fontSize: 18, fontWeight: 700, letterSpacing: 3,
-              fontFamily: FONT, marginBottom: 16, textTransform: "uppercase",
-            }}>Tonight's Leaders</div>
-            {leaderboard.slice(0, 5).map((e, i) => {
-              const isGold   = i === 0;
-              const isSilver = i === 1;
-              const isBronze = i === 2;
-              const rowBg = isGold
-                ? "linear-gradient(90deg, rgba(255,193,7,0.18), rgba(255,193,7,0.06))"
-                : isSilver
-                  ? "rgba(148,163,184,0.08)"
-                  : isBronze
-                    ? "rgba(205,127,50,0.08)"
-                    : "rgba(255,255,255,0.03)";
-              const rowBorder = isGold
-                ? "rgba(255,193,7,0.35)"
-                : isSilver
-                  ? "rgba(148,163,184,0.2)"
-                  : isBronze
-                    ? "rgba(205,127,50,0.2)"
-                    : C.cardBorder;
-              const rankColor = isGold ? "#fbbf24" : isBronze ? "#cd7f32" : C.faint;
-              return (
-                <div key={e.rank} style={{
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                  padding: "14px 20px",
-                  background: rowBg,
-                  border: `1px solid ${rowBorder}`,
-                  borderRadius: 12,
-                  marginBottom: 8,
-                  fontFamily: FONT,
-                }}>
-                  <span style={{ color: isGold ? C.text : C.muted, fontSize: 24, fontWeight: isGold ? 800 : 600 }}>
-                    <span style={{ color: rankColor, marginRight: 10, fontSize: 20 }}>#{e.rank}</span>
-                    {e.displayName}
-                  </span>
-                  <span style={{ color: isGold ? "#fbbf24" : C.muted, fontWeight: 900, fontSize: 26, fontVariantNumeric: "tabular-nums" }}>
-                    {e.totalPoints.toLocaleString()}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     );
   };
