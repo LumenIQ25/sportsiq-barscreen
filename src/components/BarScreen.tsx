@@ -547,30 +547,39 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
           }}>{triviaQ.question}</div>
         </div>
 
-        {/* Options grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-          {(["A", "B", "C", "D"] as const).map((opt) => (
-            <div key={opt} style={{
-              background: C.bgPanel,
-              border: `1px solid ${C.cardBorder}`,
-              borderRadius: 18, padding: "24px 32px",
-              display: "flex", alignItems: "center", gap: 20,
-            }}>
-              <span style={{
-                background: C.brandAlpha, border: `1px solid ${C.border}`,
-                borderRadius: 10, padding: "6px 14px",
-                color: C.brand, fontSize: 28, fontWeight: 900, fontFamily: FONT,
-              }}>{opt}</span>
-              <span style={{ color: C.text, fontSize: 30, fontWeight: 600, fontFamily: FONT, flex: 1 }}>
-                {triviaQ.options[opt]}
-              </span>
-              {total > 0 && answerCounts && (
-                <span style={{ color: C.faint, fontSize: 22, fontFamily: FONT, fontVariantNumeric: "tabular-nums" }}>
-                  {pct(answerCounts[opt], total)}%
-                </span>
-              )}
-            </div>
-          ))}
+        {/* Options — horizontal fill bars */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          {(["A", "B", "C", "D"] as const).map((opt) => {
+            const p = total > 0 && answerCounts ? pct(answerCounts[opt], total) : 0;
+            return (
+              <div key={opt} style={{ display: "flex", alignItems: "center", gap: 20 }}>
+                {/* Label */}
+                <div style={{ width: 52, color: C.faint, fontSize: 32, fontWeight: 800, fontFamily: FONT, flexShrink: 0 }}>{opt}</div>
+                {/* Answer text + fill bar stacked */}
+                <div style={{ flex: 1 }}>
+                  <div style={{ color: C.text, fontSize: 26, fontWeight: 600, fontFamily: FONT, marginBottom: 6 }}>
+                    {triviaQ.options[opt]}
+                  </div>
+                  <div style={{ height: 10, background: C.bgPanel, borderRadius: 6, overflow: "hidden", border: `1px solid ${C.cardBorder}` }}>
+                    <div style={{
+                      height: "100%",
+                      width: `${p}%`,
+                      background: "rgba(255,255,255,0.18)",
+                      borderRadius: 6,
+                      transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)",
+                    }} />
+                  </div>
+                </div>
+                {/* Percentage */}
+                <div style={{
+                  width: 88, textAlign: "right",
+                  color: total > 0 ? C.text : C.faint,
+                  fontSize: 32, fontWeight: 900, fontFamily: FONT,
+                  fontVariantNumeric: "tabular-nums", flexShrink: 0,
+                }}>{p}%</div>
+              </div>
+            );
+          })}
         </div>
 
         <div style={{ textAlign: "center", color: C.faint, fontSize: 22, fontFamily: FONT }}>
