@@ -1516,8 +1516,8 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
       {screen === "predictor-w" && <PredictorWaitingScreen />}
       {screen === "predictor-r" && <PredictorResultScreen />}
 
-      {/* Always-visible mini QR + room code in bottom-right corner */}
-      {screen !== "idle" && screen !== "predictor-w" && (
+      {/* Always-visible mini QR + room code in bottom-right corner — ALL screens */}
+      {(
         <div style={{
           position: "fixed", bottom: 28, right: 36,
           display: "flex", alignItems: "center", gap: 14,
