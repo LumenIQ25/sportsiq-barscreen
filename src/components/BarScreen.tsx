@@ -698,53 +698,53 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
             }}>{triviaQ.question}</div>
           </div>
 
-          {/* Right: Answer cards with flood-fill crowd indicator */}
+          {/* Right: Answer cards — each card expands to fill equal share of screen height */}
           <div style={{
             display: "flex", flexDirection: "column",
-            padding: "28px 64px 28px 44px",
-            gap: 12, justifyContent: "center",
+            padding: "24px 64px 24px 44px",
+            gap: 14,
           }}>
             {(["A", "B", "C", "D"] as const).map((opt) => {
               const p = total > 0 && answerCounts ? pct(answerCounts[opt], total) : 0;
               return (
                 <div key={opt} style={{
                   position: "relative",
-                  display: "flex", alignItems: "center", gap: 18,
+                  flex: 1,                              // ← fills screen: each card = ¼ of body height
+                  display: "flex", alignItems: "center", gap: 24,
                   background: C.bgPanel,
                   border: `1px solid ${C.cardBorder}`,
-                  borderRadius: 16,
-                  padding: "20px 24px",
+                  borderRadius: 18,
+                  padding: "0 32px",
                   overflow: "hidden",
-                  minHeight: 80,
                 }}>
                   {/* Flood-fill background — grows as votes arrive */}
                   <div style={{
                     position: "absolute", inset: "0 auto 0 0",
                     width: `${p}%`,
                     background: "rgba(85,69,211,0.28)",
-                    borderRadius: 16,
+                    borderRadius: 18,
                     transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
                   }} />
-                  {/* Letter badge */}
+                  {/* Letter badge — sized for TV */}
                   <div style={{
                     position: "relative", flexShrink: 0,
-                    width: 48, height: 48,
+                    width: 64, height: 64,
                     background: "rgba(255,255,255,0.08)",
-                    borderRadius: 10,
+                    borderRadius: 14,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    color: C.muted, fontSize: 22, fontWeight: 900,
+                    color: C.muted, fontSize: 28, fontWeight: 900,
                   }}>{opt}</div>
                   {/* Answer text */}
                   <div style={{
                     position: "relative", flex: 1,
-                    color: C.text, fontSize: 24, fontWeight: 600,
+                    color: C.text, fontSize: 28, fontWeight: 600,
                     fontFamily: FONT, lineHeight: 1.3,
                   }}>{triviaQ.options[opt]}</div>
                   {/* Live percentage */}
                   {total > 0 && (
                     <div style={{
                       position: "relative", flexShrink: 0,
-                      color: C.muted, fontSize: 30, fontWeight: 900,
+                      color: C.muted, fontSize: 36, fontWeight: 900,
                       fontVariantNumeric: "tabular-nums",
                     }}>{p}%</div>
                   )}
@@ -802,20 +802,21 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
               {triviaQ.question}
             </div>
 
-            {/* Answer cards — same flood-fill pattern as TriviaQ, correct glows green */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10, justifyContent: "center" }}>
+            {/* Answer cards — each expands to fill equal share of remaining height */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
               {(["A", "B", "C", "D"] as const).map((opt) => {
                 const isCorrect = opt === triviaRev.correctAnswer;
                 const p = pct(triviaRev.answerCounts[opt], total);
                 return (
                   <div key={opt} style={{
                     position: "relative",
-                    display: "flex", alignItems: "center", gap: 18,
+                    flex: 1,                            // ← fills screen: each card = ¼ of available height
+                    display: "flex", alignItems: "center", gap: 20,
                     background: isCorrect ? "rgba(34,197,94,0.08)" : C.bgPanel,
                     border: `2px solid ${isCorrect ? C.green : C.cardBorder}`,
-                    borderRadius: 14, padding: "16px 24px",
-                    overflow: "hidden", minHeight: 72,
-                    boxShadow: isCorrect ? "0 0 32px rgba(34,197,94,0.15)" : "none",
+                    borderRadius: 16, padding: "0 28px",
+                    overflow: "hidden",
+                    boxShadow: isCorrect ? "0 0 40px rgba(34,197,94,0.15)" : "none",
                     transition: "all 0.4s ease",
                   }}>
                     {/* Flood fill */}
@@ -823,23 +824,23 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
                       position: "absolute", inset: "0 auto 0 0",
                       width: `${p}%`,
                       background: isCorrect ? "rgba(34,197,94,0.20)" : "rgba(255,255,255,0.05)",
-                      borderRadius: 14,
+                      borderRadius: 16,
                       transition: "width 0.8s cubic-bezier(0.4,0,0.2,1)",
                     }} />
-                    {/* Letter / checkmark */}
+                    {/* Letter / checkmark badge */}
                     <div style={{
                       position: "relative", flexShrink: 0,
-                      width: 44, height: 44, borderRadius: 10,
+                      width: 60, height: 60, borderRadius: 12,
                       background: isCorrect ? "rgba(34,197,94,0.25)" : "rgba(255,255,255,0.06)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       color: isCorrect ? C.green : C.faint,
-                      fontSize: isCorrect ? 26 : 20, fontWeight: 900,
+                      fontSize: isCorrect ? 30 : 24, fontWeight: 900,
                     }}>{isCorrect ? "✓" : opt}</div>
                     {/* Answer text */}
                     <div style={{
                       position: "relative", flex: 1,
                       color: isCorrect ? C.text : C.muted,
-                      fontSize: isCorrect ? 26 : 22,
+                      fontSize: isCorrect ? 28 : 24,
                       fontWeight: isCorrect ? 800 : 500,
                       fontFamily: FONT, lineHeight: 1.3,
                     }}>{triviaQ.options[opt]}</div>
@@ -847,7 +848,7 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
                     <div style={{
                       position: "relative", flexShrink: 0,
                       color: isCorrect ? C.green : C.faint,
-                      fontSize: 30, fontWeight: 900,
+                      fontSize: 34, fontWeight: 900,
                       fontVariantNumeric: "tabular-nums",
                     }}>{p}%</div>
                   </div>
