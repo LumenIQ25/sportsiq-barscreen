@@ -683,75 +683,69 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
           </div>
         </div>
 
-        {/* ── Body: 2-column (question left · answer cards right) ── */}
-        <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", overflow: "hidden" }}>
-
-          {/* Left: Question */}
+        {/* ── Question ── fixed block, no extra space */}
+        <div style={{ flexShrink: 0, padding: "32px 80px 20px" }}>
           <div style={{
-            display: "flex", alignItems: "center",
-            padding: "48px 56px 48px 80px",
-            borderRight: "1px solid rgba(255,255,255,0.06)",
-          }}>
-            <div style={{
-              fontSize: 54, fontWeight: 800, color: C.text,
-              lineHeight: 1.3, fontFamily: FONT,
-            }}>{triviaQ.question}</div>
-          </div>
+            fontSize: 58, fontWeight: 800, color: C.text,
+            lineHeight: 1.25, fontFamily: FONT,
+          }}>{triviaQ.question}</div>
+        </div>
 
-          {/* Right: Answer cards — each card expands to fill equal share of screen height */}
-          <div style={{
-            display: "flex", flexDirection: "column",
-            padding: "24px 64px 24px 44px",
-            gap: 14,
-          }}>
-            {(["A", "B", "C", "D"] as const).map((opt) => {
-              const p = total > 0 && answerCounts ? pct(answerCounts[opt], total) : 0;
-              return (
-                <div key={opt} style={{
-                  position: "relative",
-                  flex: 1,                              // ← fills screen: each card = ¼ of body height
-                  display: "flex", alignItems: "center", gap: 24,
-                  background: C.bgPanel,
-                  border: `1px solid ${C.cardBorder}`,
+        {/* ── Answer cards — fill ALL remaining height, each card = ¼ ── */}
+        <div style={{
+          flex: 1,
+          display: "flex", flexDirection: "column",
+          padding: "0 80px 32px",
+          gap: 14,
+          overflow: "hidden",
+        }}>
+          {(["A", "B", "C", "D"] as const).map((opt) => {
+            const p = total > 0 && answerCounts ? pct(answerCounts[opt], total) : 0;
+            return (
+              <div key={opt} style={{
+                position: "relative",
+                flex: 1,
+                display: "flex", alignItems: "center", gap: 24,
+                background: C.bgPanel,
+                border: `1px solid ${C.cardBorder}`,
+                borderRadius: 18,
+                padding: "0 36px",
+                overflow: "hidden",
+              }}>
+                {/* Flood-fill background grows as votes arrive */}
+                <div style={{
+                  position: "absolute", inset: "0 auto 0 0",
+                  width: `${p}%`,
+                  background: "rgba(85,69,211,0.28)",
                   borderRadius: 18,
-                  padding: "0 32px",
-                  overflow: "hidden",
-                }}>
-                  {/* Flood-fill background — grows as votes arrive */}
-                  <div style={{
-                    position: "absolute", inset: "0 auto 0 0",
-                    width: `${p}%`,
-                    background: "rgba(85,69,211,0.28)",
-                    borderRadius: 18,
-                    transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
-                  }} />
-                  {/* Letter badge — sized for TV */}
+                  transition: "width 0.6s cubic-bezier(0.4,0,0.2,1)",
+                }} />
+                {/* Letter badge */}
+                <div style={{
+                  position: "relative", flexShrink: 0,
+                  width: 64, height: 64,
+                  background: "rgba(255,255,255,0.08)",
+                  borderRadius: 14,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  color: C.muted, fontSize: 28, fontWeight: 900,
+                }}>{opt}</div>
+                {/* Answer text */}
+                <div style={{
+                  position: "relative", flex: 1,
+                  color: C.text, fontSize: 30, fontWeight: 600,
+                  fontFamily: FONT, lineHeight: 1.3,
+                }}>{triviaQ.options[opt]}</div>
+                {/* Live % */}
+                {total > 0 && (
                   <div style={{
                     position: "relative", flexShrink: 0,
-                    width: 64, height: 64,
-                    background: "rgba(255,255,255,0.08)",
-                    borderRadius: 14,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    color: C.muted, fontSize: 28, fontWeight: 900,
-                  }}>{opt}</div>
-                  {/* Answer text */}
-                  <div style={{
-                    position: "relative", flex: 1,
-                    color: C.text, fontSize: 28, fontWeight: 600,
-                    fontFamily: FONT, lineHeight: 1.3,
-                  }}>{triviaQ.options[opt]}</div>
-                  {/* Live percentage */}
-                  {total > 0 && (
-                    <div style={{
-                      position: "relative", flexShrink: 0,
-                      color: C.muted, fontSize: 36, fontWeight: 900,
-                      fontVariantNumeric: "tabular-nums",
-                    }}>{p}%</div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    color: C.muted, fontSize: 38, fontWeight: 900,
+                    fontVariantNumeric: "tabular-nums",
+                  }}>{p}%</div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
