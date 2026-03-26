@@ -30,7 +30,7 @@ function getToken(): string {
 export default function App() {
   const barId   = getBarId();
   const token   = getToken();
-  const joinUrl = `https://lumen-iq.com/join/${barId}`;
+  const joinUrl = `https://apps.apple.com/us/app/sports-iq/id6759401599`;
 
   const [roomCode, setRoomCode] = useState<string>("-----");
 
