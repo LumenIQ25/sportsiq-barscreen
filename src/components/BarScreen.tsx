@@ -61,6 +61,7 @@ export function BarScreen({ token, barId, roomCode, joinUrl }: Props) {
           answerCounts={state.answerCounts}
           totalAnswers={state.totalAnswers}
           countdown={state.countdown}
+          leaderboard={state.leaderboard}
         />
       )}
 
